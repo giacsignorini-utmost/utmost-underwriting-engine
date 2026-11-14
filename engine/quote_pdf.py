@@ -74,7 +74,9 @@ def build_quote_pdf(app, pol, uw, res, author: str = "Giacomo Signorini") -> byt
     el.append(_table([
         ["Gross premium", f"{_eur(res.premium)} {unit}", "Rate", f"{res.rate_permille:.3f} per mille"],
         ["PV expected claims", _eur(d["Expected claims"]), "PV expenses", _eur(d["Expenses and underwriting"])],
-        ["PV commission", _eur(d["Distribution commission"]), "PV profit (gross)", _eur(d["Profit margin"])],
+        ["PV commission", _eur(d["Distribution commission"]), "PV net cost of reinsurance", _eur(d["Net cost of reinsurance"])],
+        ["PV profit (net)", _eur(d["Profit margin"]), "Premium without reinsurance",
+         _eur(res.reinsurance_summary["Premium without reinsurance"])],
     ], [W * 0.2, W * 0.3, W * 0.2, W * 0.3], header=False))
 
     el.append(Paragraph("Reinsurance placement", h2))
@@ -87,7 +89,7 @@ def build_quote_pdf(app, pol, uw, res, author: str = "Giacomo Signorini") -> byt
     el.append(Spacer(1, 3))
     el.append(_table([
         ["Net cost of reinsurance (PV)", _eur(r["Net cost of reinsurance"]), "PV profit net", _eur(r["PV profit net"])],
-        ["Premium for target margin net", _eur(r["Premium for target margin net of reinsurance"]), "", ""],
+        ["PV profit if no reinsurance", _eur(r["PV profit gross"]), "", ""],
     ], [W * 0.28, W * 0.22, W * 0.2, W * 0.3], header=False))
 
     c = res.capital

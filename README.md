@@ -1,8 +1,8 @@
-# Life Underwriting Engine
+# Jumbo Life Underwriting Engine
 
-**An end-to-end pricing lab for high sum assured term life cover: from the medical file to the capital at risk net of reinsurance.**
+**An end-to-end pricing lab for high sum assured term life cover: from the medical file to the capital position net of reinsurance.**
 
-Case study prepared for the Product Team of Utmost Group by **Giacomo Signorini**. All assumptions are illustrative.
+Case study prepared for Utmost Group by **Giacomo Signorini**, product actuary. All assumptions are illustrative; this is not an Utmost product.
 
 ## What it does
 

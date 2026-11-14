@@ -206,7 +206,8 @@ else:
     unit = "/ year" if pol.premium_mode == "annual" else "single"
     k[2].metric(f"Gross premium {unit}", eur(res.premium), f"{res.rate_permille:.2f}‰ of SA", delta_color="off", delta_arrow="off")
     k[3].metric("PV profit net of reinsurance", eur(res.reinsurance_summary["PV profit net"]),
-                f"gross {eur(res.reinsurance_summary['PV profit gross'])}", delta_color="off", delta_arrow="off")
+                f"{res.reinsurance_summary['PV profit net'] / res.decomposition['PV premiums']:.0%} of PV premiums",
+                delta_color="off", delta_arrow="off")
     k[4].metric("SCR life relief", eur(res.capital["Capital relief"]),
                 f"{res.capital['Capital relief'] / max(res.capital['SCR life gross'], 1):.0%} of gross SCR",
                 delta_color="off", delta_arrow="off")
@@ -247,9 +248,10 @@ if res is not None:
         with c1:
             st.subheader("Where the premium goes (PV)")
             d = res.decomposition
-            parts = ["Expected claims", "Expenses and underwriting", "Distribution commission", "Profit margin"]
+            parts = ["Expected claims", "Expenses and underwriting", "Distribution commission",
+                     "Net cost of reinsurance", "Profit margin"]
             fig = go.Figure(go.Bar(x=[d[p] for p in parts], y=parts, orientation="h",
-                                   marker_color=[NAVY, GREY, GOLD, TEAL],
+                                   marker_color=[NAVY, GREY, GOLD, RED, TEAL],
                                    text=[f"{eur(d[p])} ({d[p] / d['PV premiums']:.0%})" for p in parts],
                                    textposition="auto"))
             fig.update_layout(height=320, margin=dict(l=0, r=10, t=10, b=10), yaxis=dict(autorange="reversed"),
@@ -266,10 +268,11 @@ if res is not None:
             fig.update_layout(height=320, margin=dict(l=0, r=10, t=10, b=10), yaxis_title="q (per mille)",
                               xaxis_title="Policy year", legend=dict(orientation="h", y=1.1))
             st.plotly_chart(fig, width="stretch")
-        p_net = res.reinsurance_summary["Premium for target margin net of reinsurance"]
-        st.info(f"The gross premium of **{eur(res.premium)}** meets the {S.margin:.0f}% margin before reinsurance. "
-                f"To keep the same margin **after** the cost of this reinsurance programme, the premium would need "
-                f"to be **{eur(p_net)}** ({p_net / res.premium - 1:+.1%}).")
+        p_gross = res.reinsurance_summary["Premium without reinsurance"]
+        st.info(f"The premium of **{eur(res.premium)}** delivers the {S.margin:.0f}% target margin **after** the "
+                f"net cost of the reinsurance programme. Without any reinsurance the same margin would need "
+                f"**{eur(p_gross)}**, so reinsurance adds **{res.premium / p_gross - 1:+.1%}** to the price "
+                f"in exchange for the capital and volatility relief shown under Risk and capital.")
 
     # ------------------------------------------------------------------------- reinsurance
     with tabs[2]:

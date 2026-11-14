@@ -182,8 +182,8 @@ class CaseModel:
         return gross, net
 
     # ------------------------------------------------------------------ pricing
-    def price(self, net: bool = False) -> float:
-        """Solve E[PV profit] = margin * PV(premiums), gross or net of reinsurance.
+    def price(self, net: bool = True) -> float:
+        """Solve E[PV profit] = margin * PV(premiums), net of reinsurance (default) or gross.
         PV profit is linear in the premium, so two evaluations give the exact solution."""
         m = self.cfg["pricing"]["profit_margin"]
         p = outcome_probs(self.q, self.w)
@@ -198,7 +198,9 @@ class CaseModel:
     # ------------------------------------------------------------------ full run
     def run(self) -> CaseResult:
         res = CaseResult(premium_mode=self.pol.premium_mode)
-        P = self.price()
+        # The premium is set so that the target margin holds AFTER the net cost of reinsurance.
+        # A pure protection product must recover what it pays its reinsurers.
+        P = self.price(net=True)
         res.premium = P
         res.rate_permille = 1000 * P / self.pol.sum_assured
         res.layers = self.layers
@@ -215,25 +217,27 @@ class CaseModel:
         pv_exp = float(lt @ (k["exp"] * k["disc_start"]))
         pv_claims = float(lt @ (self.q * self.pol.sum_assured * k["disc_end"]))
         pv_profit_g = float(probs @ gross)
-        res.decomposition = {
-            "Expected claims": pv_claims, "Expenses and underwriting": pv_exp,
-            "Distribution commission": pv_comm, "Profit margin": pv_profit_g,
-            "PV premiums": pv_prem,
-        }
 
         pv_ri_prem = float(lt @ (k["ri_prem"] * k["disc_start"]))
         pv_allow = float(lt @ (k["allowance"] * k["disc_start"]))
         pv_brok = float(lt @ (k["brokerage"] * k["disc_start"]))
         pv_recov = float(lt @ (self.q * self.ceded_sa * k["disc_end"]))
         pv_profit_n = float(probs @ net)
+        ri_cost = pv_ri_prem - pv_allow + pv_brok - pv_recov
+
+        res.decomposition = {
+            "Expected claims": pv_claims, "Expenses and underwriting": pv_exp,
+            "Distribution commission": pv_comm, "Net cost of reinsurance": ri_cost,
+            "Profit margin": pv_profit_n, "PV premiums": pv_prem,
+        }
         res.reinsurance_summary = {
             "PV reinsurance premiums": pv_ri_prem, "PV treaty allowances": pv_allow,
             "PV brokerage": pv_brok, "PV expected recoveries": pv_recov,
-            "Net cost of reinsurance": pv_ri_prem - pv_allow + pv_brok - pv_recov,
+            "Net cost of reinsurance": ri_cost,
             "PV profit gross": pv_profit_g, "PV profit net": pv_profit_n,
             "Ceded sum assured": self.ceded_sa,
             "Retained sum assured": self.layers[0].sum_assured,
-            "Premium for target margin net of reinsurance": self.price(net=True),
+            "Premium without reinsurance": self.price(net=False),
         }
         res.reinsurance_summary["Per layer PV premium"] = {
             name: float(lt @ (p * k["disc_start"])) for name, p in k["per_layer"].items()}

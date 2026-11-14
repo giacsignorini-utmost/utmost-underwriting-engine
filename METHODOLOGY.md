@@ -39,11 +39,11 @@ Each outcome has a present value of all cash flows, both gross and net of reinsu
 
 ### 4. Pricing
 
-The premium $P$ solves
+This is a pure protection product: the only benefit is the sum assured on death. Its price must therefore recover everything the company pays out, including what it pays its reinsurers. The premium $P$ solves
 
-$$E[\text{PV profit}] = m \cdot \text{PV}(\text{premiums}),$$
+$$E[\text{PV profit net of reinsurance}] = m \cdot \text{PV}(\text{premiums}),$$
 
-where $m$ is the target margin. Because PV profit is linear in $P$, two evaluations give the exact solution, with no iteration. The app also shows the premium needed to hit the same margin **after** the net cost of reinsurance, a figure that is often left out of jumbo case pricing.
+where $m$ is the target margin. PV profit is linear in $P$, so two evaluations give the exact solution, with no iteration. The premium decomposes exactly into expected claims, expenses and underwriting, distribution commission, net cost of reinsurance and profit. The app also shows the premium that would give the same margin with no reinsurance at all, which measures what the reinsurance programme adds to the price.
 
 ### 5. Reinsurance
 
