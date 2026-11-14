@@ -37,16 +37,17 @@ def test_premium_hits_target_margin(mode):
     _, _, res = _run(app, pol)
     d = res.decomposition
     assert d["Profit margin"] == pytest.approx(CFG["pricing"]["profit_margin"] * d["PV premiums"], rel=1e-9)
-    total = d["Expected claims"] + d["Expenses and underwriting"] + d["Distribution commission"] + d["Profit margin"]
+    total = (d["Expected claims"] + d["Expenses and underwriting"] + d["Distribution commission"]
+             + d["Net cost of reinsurance"] + d["Profit margin"])
     assert total == pytest.approx(d["PV premiums"], rel=1e-9)
 
 
-def test_net_premium_hits_target_margin_after_reinsurance():
+def test_gross_basis_premium_hits_target_margin_without_reinsurance():
     app, pol = demo_case(list(DEMO_CASES)[2])
     _, model, res = _run(app, pol)
-    p_net = res.reinsurance_summary["Premium for target margin net of reinsurance"]
+    p_net = res.reinsurance_summary["Premium without reinsurance"]
     probs = outcome_probs(model.q, model.w)
-    _, net = model.outcome_values(p_net)
+    net, _ = model.outcome_values(p_net)
     l = np.concatenate([[1.0], np.cumprod((1 - model.q) * (1 - model.w))])[:-1]
     pv_prem = p_net * float(l @ model.v ** model.t)
     assert probs @ net == pytest.approx(CFG["pricing"]["profit_margin"] * pv_prem, rel=1e-9)
