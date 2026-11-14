@@ -65,11 +65,19 @@ S = st.session_state
 with st.sidebar:
     st.markdown("### Case")
     demo = st.selectbox("Demo case", list(DEMO_CASES), key="demo")
-    if st.button("Load demo case", width="stretch"):
+    b1, b2 = st.columns(2)
+    load_demo = b1.button("Load demo", width="stretch")
+    new_case = b2.button("New blank case", width="stretch", type="primary")
+    if load_demo or new_case:
         for k in [k for k in S.keys() if str(k).startswith("cond_")]:
             del S[k]
-        apply_case(*demo_case(demo))
+        if load_demo:
+            apply_case(*demo_case(demo))
+        else:
+            # Standard healthy client, no conditions, no hazardous pursuits
+            apply_case(Applicant(age=40), Policy(sum_assured=1_000_000.0, term=20))
         st.rerun()
+    st.caption("Every field below can be edited. Results update instantly.")
 
     with st.expander("Client", expanded=True):
         c1, c2 = st.columns(2)
@@ -340,11 +348,11 @@ if res is not None:
         with c2:
             g, n = res.exact_stats["gross"], res.exact_stats["net"]
             st.dataframe(pd.DataFrame({
-                "Metric": ["Expected PV profit", "Standard deviation", "Probability of loss", "VaR 99.5% (loss)",
-                           "Worst outcome"],
-                "Gross": [eur(g["mean"]), eur(g["std"]), f"{g['prob_loss']:.2%}", eur(g["VaR 99.5% loss"]),
+                "Metric": ["Expected PV profit", "Standard deviation", "Probability of loss",
+                           "Result at 99.5% VaR", "Worst outcome"],
+                "Gross": [eur(g["mean"]), eur(g["std"]), f"{g['prob_loss']:.2%}", eur(-g["VaR 99.5% loss"]),
                           eur(g["worst"])],
-                "Net": [eur(n["mean"]), eur(n["std"]), f"{n['prob_loss']:.2%}", eur(n["VaR 99.5% loss"]),
+                "Net": [eur(n["mean"]), eur(n["std"]), f"{n['prob_loss']:.2%}", eur(-n["VaR 99.5% loss"]),
                         eur(n["worst"])]}), hide_index=True, width="stretch")
 
         st.subheader(f"Monte Carlo: portfolio of {S.portfolio} similar lives")
@@ -371,12 +379,14 @@ if res is not None:
         with c2:
             g, n = sim["stats_gross"], sim["stats_net"]
             st.dataframe(pd.DataFrame({
-                "Metric": ["Expected PV profit", "Standard deviation", "Probability of loss", "VaR 99.5% (loss)",
-                           "TVaR 99.5% (loss)"],
-                "Gross": [eur(g["mean"]), eur(g["std"]), f"{g['prob_loss']:.1%}", eur(g["VaR 99.5% loss"]),
-                          eur(g["TVaR 99.5% loss"])],
-                "Net": [eur(n["mean"]), eur(n["std"]), f"{n['prob_loss']:.1%}", eur(n["VaR 99.5% loss"]),
-                        eur(n["TVaR 99.5% loss"])]}), hide_index=True, width="stretch")
+                "Metric": ["Expected PV profit", "Standard deviation", "Probability of loss",
+                           "Result at 99.5% VaR", "Average of worst 0.5% (TVaR)"],
+                "Gross": [eur(g["mean"]), eur(g["std"]), f"{g['prob_loss']:.1%}", eur(-g["VaR 99.5% loss"]),
+                          eur(-g["TVaR 99.5% loss"])],
+                "Net": [eur(n["mean"]), eur(n["std"]), f"{n['prob_loss']:.1%}", eur(-n["VaR 99.5% loss"]),
+                        eur(-n["TVaR 99.5% loss"])]}), hide_index=True, width="stretch")
+            st.caption("All figures are PV results: negative means a loss. The 99.5% VaR row is the result "
+                       "in the 1-in-200 worst scenario.")
             st.caption(f"Average claims per scenario: {sim['claims'].mean():.2f}")
 
         st.subheader("Solvency II life underwriting risk (simplified standard formula)")
