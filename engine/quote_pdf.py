@@ -10,8 +10,9 @@ from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
 from reportlab.lib.units import mm
 from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
 
-NAVY = colors.HexColor("#0B2545")
-LIGHT = colors.HexColor("#EEF2F7")
+NAVY = colors.HexColor("#6D1A36")  # bordeaux primary
+GOLD = colors.HexColor("#B08D57")
+LIGHT = colors.HexColor("#F7F2EF")
 
 
 def _eur(x: float) -> str:
@@ -21,7 +22,7 @@ def _eur(x: float) -> str:
 def _table(rows, widths, header=True):
     t = Table(rows, colWidths=widths)
     style = [("FONTSIZE", (0, 0), (-1, -1), 8), ("VALIGN", (0, 0), (-1, -1), "TOP"),
-             ("GRID", (0, 0), (-1, -1), 0.25, colors.HexColor("#C9D3DF")),
+             ("GRID", (0, 0), (-1, -1), 0.25, colors.HexColor("#E3D6D0")),
              ("TOPPADDING", (0, 0), (-1, -1), 2), ("BOTTOMPADDING", (0, 0), (-1, -1), 2)]
     if header:
         style += [("BACKGROUND", (0, 0), (-1, 0), NAVY), ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
@@ -35,8 +36,8 @@ def build_quote_pdf(app, pol, uw, res, author: str = "Giacomo Signorini") -> byt
     doc = SimpleDocTemplate(buf, pagesize=A4, leftMargin=15 * mm, rightMargin=15 * mm,
                             topMargin=12 * mm, bottomMargin=12 * mm)
     ss = getSampleStyleSheet()
-    h1 = ParagraphStyle("h1", parent=ss["Title"], fontSize=15, textColor=NAVY, spaceAfter=2)
-    h2 = ParagraphStyle("h2", parent=ss["Heading3"], fontSize=10, textColor=NAVY, spaceBefore=6, spaceAfter=3)
+    h1 = ParagraphStyle("h1", parent=ss["Title"], fontName="Times-Bold", fontSize=17, textColor=NAVY, spaceAfter=2)
+    h2 = ParagraphStyle("h2", parent=ss["Heading3"], fontName="Times-Bold", fontSize=11, textColor=NAVY, spaceBefore=6, spaceAfter=3)
     body = ParagraphStyle("b", parent=ss["BodyText"], fontSize=8, leading=10)
     small = ParagraphStyle("s", parent=body, fontSize=7, textColor=colors.grey)
     W = doc.width
