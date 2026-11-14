@@ -1,6 +1,6 @@
 # Life Underwriting Engine
 
-**An end-to-end pricing lab for high sum assured term life cover: from the the medical file to the capital at risk net of reinsurance.**
+**An end-to-end pricing lab for high sum assured term life cover: from the medical file to the capital at risk net of reinsurance.**
 
 Case study prepared for the Product Team of Utmost Group by **Giacomo Signorini**. All assumptions are illustrative.
 
