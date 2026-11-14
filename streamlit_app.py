@@ -15,7 +15,7 @@ from engine.quote_pdf import build_quote_pdf
 
 st.set_page_config(page_title="Jumbo Life Underwriting Engine", page_icon="◆", layout="wide")
 
-NAVY, TEAL, GOLD, RED, GREY = "#0B2545", "#13807A", "#C49A2C", "#B5413B", "#8A94A6"
+NAVY, TEAL, GOLD, RED, GREY = "#6D1A36", "#2F6B62", "#B08D57", "#D1495B", "#9A8F8C"  # NAVY = bordeaux primary
 CFG = load_config()
 
 
@@ -173,7 +173,17 @@ ri = ReinsuranceProgram(
     brokerage=S.brokerage / 100, concentration_alert=CFG["reinsurance"]["concentration_alert"])
 
 # ----------------------------------------------------------------------------- header
-st.markdown(f"<h1 style='color:{NAVY};margin-bottom:0'>Jumbo Life Underwriting Engine</h1>", unsafe_allow_html=True)
+st.markdown(
+    f"""<div style="display:flex;align-items:center;gap:18px;margin-bottom:4px">
+      <div style="width:58px;height:58px;border-radius:50%;background:{NAVY};color:#F7F2EF;display:flex;
+                  align-items:center;justify-content:center;font-family:Georgia,'Times New Roman',serif;
+                  font-size:24px;letter-spacing:1px;border:2px solid {GOLD}">GS</div>
+      <div>
+        <div style="font-family:Georgia,'Times New Roman',serif;font-size:40px;line-height:1.1;color:{NAVY}">
+          Jumbo Life Underwriting Engine</div>
+        <div style="height:2px;width:120px;background:{GOLD};margin-top:8px"></div>
+      </div></div>""",
+    unsafe_allow_html=True)
 st.caption("Case study prepared for Utmost Group by Giacomo Signorini · Term life death cover up to EUR 20m · "
            "Underwriting, pricing, reinsurance placement and Solvency II capital in one flow · "
            "Illustrative assumptions, not an Utmost product")
